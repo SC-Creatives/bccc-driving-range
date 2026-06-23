@@ -260,10 +260,10 @@ html.immersive.landscape .topbar{position:absolute;top:0;left:0;right:0;z-index:
   padding:max(7px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) 4px max(12px,env(safe-area-inset-left));}
 html.immersive.landscape .brand-logo{width:clamp(82px,16cqw,114px);}
 html.immersive.landscape .brand-sub{font-size:clamp(7px,1.05cqw,10px);letter-spacing:.36em;margin-top:3px;}
-html.immersive.landscape .stats{gap:12px;}
-html.immersive.landscape .stat .label{font-size:7px;}
-html.immersive.landscape .stat .val{font-size:14px;}
-html.immersive.landscape .stat .val .yd{font-size:9px;}
+html.immersive.landscape .stats{gap:16px;}
+html.immersive.landscape .stat .label{font-size:14px;letter-spacing:.18em;}
+html.immersive.landscape .stat .val{font-size:28px;}
+html.immersive.landscape .stat .val .yd{font-size:18px;}
 /* in actual gameplay the HUD floats over the LIGHT sky → flip the mark + stats to
    pine for contrast (no shadow). Title/result/intro keep the bone-on-dark look. */
 html.immersive.landscape.in-play .brand-logo{background:var(--pine-deep);}
