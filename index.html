@@ -2,9 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<!-- NO viewport-fit=cover: keep the game INSIDE the safe area so it never runs
+     under the Dynamic Island / camera (Safari & Brave honor cover and pushed
+     edge-to-edge under the camera; the pine bg fills around the safe area). -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>The Driving Range — Blue Collar Country Club</title>
-<!-- iOS: fill the safe area (no notch/Island letterbox) + "Add to Home Screen" runs
+<!-- iOS: "Add to Home Screen" runs
      chrome-free fullscreen. status bar translucent over the pine scene. -->
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="mobile-web-app-capable" content="yes" />
