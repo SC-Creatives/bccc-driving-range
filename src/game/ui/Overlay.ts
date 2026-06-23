@@ -54,12 +54,12 @@ export class Overlay {
         `<img class="ov-lockup" src="${import.meta.env.BASE_URL}assets/art/bccc-lockup.png" alt="Blue Collar Country Club" />` +
         '<div class="ov-rule"></div>' +
         `<div class="ov-line">Three balls. One reputation.<br>Smash a drive past ${TUNING.MEMBER_THRESHOLD} yards and the club<br>makes it official.</div>` +
-        '<div class="prompt">Tap to tee off</div>' +
         '<div class="handed" id="handed">' +
         '<span class="handed-lbl">Your swing</span>' +
         `<button class="handed-opt${s.handed === 'L' ? ' on' : ''}" data-h="L">Lefty</button>` +
         `<button class="handed-opt${s.handed === 'R' ? ' on' : ''}" data-h="R">Righty</button>` +
         '</div>' +
+        '<div class="prompt">Tap to tee off</div>' +
         '<button class="howto" id="howto">How to play</button>' +
         '<div class="members" style="margin-top:1.6cqw"><h4>No Suits &middot; No Ties &middot; All Trades Welcome</h4></div>',
     );
