@@ -8,3 +8,4 @@ dist-ssr
 .env.*
 !.env.example
 *.log
+public/assets/video/*.lowres.bak
