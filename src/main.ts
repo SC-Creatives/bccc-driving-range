@@ -56,12 +56,12 @@ try {
   /* no storage */
 }
 
-// the .brand-logo CSS mask must respect the deploy base (vite base './'), so the
-// URL is injected here rather than hardcoded absolute in the stylesheet
-document.documentElement.style.setProperty(
-  '--logo-mask',
-  `url(${import.meta.env.BASE_URL}assets/art/trollco-logo.png)`,
-);
+// the .brand-logo CSS mask must respect the deploy base (vite base './'). Resolve
+// to an ABSOLUTE url against the document — a relative url() inside a CSS custom
+// property resolves against the *stylesheet* file in WebKit, which on a subpath
+// deploy (GitHub Pages) doubles the path (/assets/assets/...) and the logo vanishes.
+const logoUrl = new URL(`${import.meta.env.BASE_URL}assets/art/trollco-logo.png`, document.baseURI).href;
+document.documentElement.style.setProperty('--logo-mask', `url("${logoUrl}")`);
 
 function applyLayoutClasses(): void {
   const root = document.documentElement;
