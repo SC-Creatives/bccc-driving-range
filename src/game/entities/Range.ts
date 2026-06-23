@@ -105,9 +105,8 @@ export class Range {
       g.circle(sx, GROUND + 4, 2.5).fill({ color: 0xece3cf, alpha: 0.55 });
     }
 
-    // pin + pennant (decorative marker; pulled short of MEMBER_THRESHOLD so it
-    // clears the right-edge TAP cue at address)
-    this.drawPin(g, s, TUNING.PIN_MARKER_YD);
+    // pin + pennant at member threshold
+    this.drawPin(g, s, TUNING.MEMBER_THRESHOLD);
 
     // divot / landing puffs
     for (const pf of s.puffs) {

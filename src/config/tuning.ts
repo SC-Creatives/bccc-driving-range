@@ -9,10 +9,6 @@ export const TUNING = {
   MEMBER_THRESHOLD: 300, // yards for a single drive to earn membership
   CHEER_THRESHOLD: 340, // yards for the full crowd roar (clap plays at 300+)
   BALLS_PER_ROUND: 3,
-  // Decorative pin marker position. Pulled in from MEMBER_THRESHOLD (300) so the
-  // flag clears the right-edge TAP cue at address; purely visual, scoring is
-  // distance-based and independent of where the flag is drawn.
-  PIN_MARKER_YD: 255,
 
   // ---- swing meters ----
   // eased 2026-06-08 (owner calls): power 1.62->1.40; contact 2.55->2.25->2.0 —
