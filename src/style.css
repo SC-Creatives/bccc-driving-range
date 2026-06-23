@@ -129,9 +129,9 @@ body{height:100%;
 /* "Tap here" cue during the tap phases — purely a visual focal point; pointer
    -events:none so the tap still lands on the canvas (you can tap anywhere). */
 .tap-cue{
-  position:absolute;top:30%;transform:translateY(-50%);z-index:4;
-  right:1.5%;left:auto; /* righty default: hug the right edge, raised to clear the pin */
-  width:clamp(72px,10.5cqw,108px);height:clamp(72px,10.5cqw,108px);border-radius:50%;
+  position:absolute;top:42%;transform:translateY(-50%);z-index:4;
+  right:1.5%;left:auto; /* righty default: hug the right edge at thumb height */
+  width:clamp(72px,10.5cqw,104px);height:clamp(72px,10.5cqw,104px);border-radius:50%;
   display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;
   color:var(--gold-bright);border:2px solid var(--gold-bright);background:rgba(20,38,27,.42);
   font-family:'Cormorant Garamond',Georgia,serif;letter-spacing:.12em;text-transform:uppercase;
