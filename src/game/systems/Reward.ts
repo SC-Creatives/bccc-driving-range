@@ -37,6 +37,9 @@ export const Reward = {
       s.resultGrade = 'Worm Burner';
       s.resultLine = '“It went forward. We’re calling that a positive.”';
     }
-    if (Q >= 0.97 && yd >= 200) s.resultGrade = 'PURE — Flushed It';
+    // PURE is the pinnacle: an elite strike AND a genuinely big drive. Gating on
+    // distance too (not just contact Q) stops a flushed-but-low-power swing from
+    // reading "PURE" at mediocre yardage (e.g. a perfect strike that only carried 252).
+    if (Q >= 0.97 && yd >= TUNING.MEMBER_THRESHOLD) s.resultGrade = 'PURE — Flushed It';
   },
 };
