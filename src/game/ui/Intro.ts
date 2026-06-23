@@ -44,6 +44,7 @@ export interface IntroShot {
   label: string;
   src: string; // video URL (public/assets/video/*)
   duration: number; // ms the fallback slate holds before auto-advancing
+  volume?: number; // playback gain 0..1 (default 1) — tame loud clips vs the mix
   caption?: string;
 }
 
@@ -211,7 +212,7 @@ export class Intro {
 
       if (video) {
         video.muted = !this.audioEnabled; // unmuted after the gate gesture
-        video.volume = 1;
+        video.volume = shot.volume ?? 1;
         video.onended = () => finish();
         video.onerror = () => finish(); // unexpected decode error — don't get stuck
         // reveal on the first PRESENTED frame; only then drop the previous

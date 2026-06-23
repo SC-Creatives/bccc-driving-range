@@ -123,8 +123,8 @@ export class Game {
     // engraved brand grade (see reference/intro-shot-prompts.md); labeled slates
     // stand in until they're dropped in public/assets/video/.
     const shots: IntroShot[] = [
-      { id: 'rigs', label: 'The Crew Rolls In', src: `${base}assets/video/intro-rigs.mp4`, duration: 3500, caption: 'The rigs pull up to the club. No suits. No ties.' },
-      { id: 'crew', label: 'All Trades Welcome', src: `${base}assets/video/intro-crew.mp4`, duration: 3500, caption: 'Eight strong, headed for the clubhouse.' },
+      { id: 'rigs', label: 'The Crew Rolls In', src: `${base}assets/video/intro-rigs.mp4`, duration: 3500, volume: 0.5, caption: 'The rigs pull up to the club. No suits. No ties.' },
+      { id: 'crew', label: 'All Trades Welcome', src: `${base}assets/video/intro-crew.mp4`, duration: 3500, volume: 0.5, caption: 'Eight strong, headed for the clubhouse.' },
       { id: 'ots', label: 'Sizing It Up', src: `${base}assets/video/intro-ots.mp4`, duration: 3500, caption: 'Over the shoulder — the range opens up.' },
     ];
     const intro = new Intro(this.dom.stage, shots, this.reducedMotion, this.audio, () => {
