@@ -266,13 +266,20 @@ html.immersive:not(.landscape) .rotate-hint .rot-sub{font-size:12px;letter-spaci
 html.immersive.landscape body{padding:0;margin:0;overflow:hidden;}
 /* position:fixed + inset:0 fills the VIEWPORT directly — no dependence on
    100vw/100dvh/--app-height or safe-area math (those were leaving green bars). */
-html.immersive.landscape .clubhouse{position:fixed;inset:0;width:auto;height:auto;max-width:none;padding:0;border:none;border-radius:0;box-shadow:none;}
+/* inset the GAME by the safe-area amounts so it never runs under the Dynamic
+   Island / camera (Brave defaults to full-bleed without this; Safari/Chrome
+   resolve env() to ~0 where they already inset, so they look unchanged). The
+   pine html/body fills the gap around it. */
+html.immersive.landscape .clubhouse{position:fixed;
+  top:env(safe-area-inset-top);right:env(safe-area-inset-right);
+  bottom:env(safe-area-inset-bottom);left:env(safe-area-inset-left);
+  width:auto;height:auto;max-width:none;padding:0;border:none;border-radius:0;box-shadow:none;}
 html.immersive.landscape .clubhouse::before{display:none;}
 html.immersive.landscape .stage{position:absolute;inset:0;border:none;border-radius:0;background:#15281c;}
 html.immersive.landscape .stage canvas{position:absolute;inset:0;width:100%!important;height:100%!important;}
 html.immersive.landscape .topbar{position:absolute;top:0;left:0;right:0;z-index:7;pointer-events:none;background:none;
   align-items:flex-start; /* top-align so the logo sits on the BALL/BEST line, not above it */
-  padding:max(7px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) 4px max(12px,env(safe-area-inset-left));}
+  padding:7px 12px 4px 12px;} /* safe-area handled by the inset .clubhouse */
 html.immersive.landscape .brand-logo{width:clamp(82px,16cqw,114px);}
 html.immersive.landscape .brand-sub{font-size:clamp(7px,1.05cqw,10px);letter-spacing:.36em;margin-top:3px;}
 html.immersive.landscape .stats{gap:16px;}
@@ -287,7 +294,7 @@ html.immersive.landscape.in-play .stat .label{color:var(--pine);}
 html.immersive.landscape.in-play .stat .val{color:var(--pine-deep);}
 html.immersive.landscape.in-play .stat .val .yd{color:var(--pine);}
 html.immersive.landscape .footer{position:absolute;bottom:0;left:0;right:0;z-index:7;pointer-events:none;background:none;justify-content:flex-start;
-  padding:6px max(12px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));}
+  padding:6px 12px 8px 12px;} /* safe-area handled by the inset .clubhouse */
 html.immersive.landscape .footer .tag{display:none;}
 html.immersive.landscape .ov-inner{padding:8px 16px;}
 html.immersive.landscape .crest{height:clamp(54px,10.5cqw,82px);width:auto;margin-bottom:1.4cqw;}
