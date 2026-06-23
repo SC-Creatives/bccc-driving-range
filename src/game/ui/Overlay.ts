@@ -60,9 +60,33 @@ export class Overlay {
         `<button class="handed-opt${s.handed === 'L' ? ' on' : ''}" data-h="L">Lefty</button>` +
         `<button class="handed-opt${s.handed === 'R' ? ' on' : ''}" data-h="R">Righty</button>` +
         '</div>' +
-        '<div class="members" style="margin-top:2.4cqw"><h4>No Suits &middot; No Ties &middot; All Trades Welcome</h4></div>',
+        '<button class="howto" id="howto">How to play</button>' +
+        '<div class="members" style="margin-top:1.6cqw"><h4>No Suits &middot; No Ties &middot; All Trades Welcome</h4></div>',
     );
     this.wireHanded(s);
+    const howto = document.getElementById('howto');
+    if (howto) howto.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.showCoach(() => this.showTitle(s), true); // replay → back to title
+    });
+  }
+
+  /** One-time "How to Play" coach card — teaches the two-tap swing, then gets out
+   *  of the way (the side TAP/LOCK IT/STRIKE button + meters carry it after). Shown
+   *  before the first round (Game.beginPlay) and replayable from the title. */
+  showCoach(onGo: () => void, replay = false): void {
+    this.show(
+      '<div class="coach">' +
+        '<div class="coach-head">The Swing &middot; Two Taps</div>' +
+        '<div class="coach-step"><span class="cs-n">1</span><span class="cs-t"><b>Tap</b> to start your swing.</span></div>' +
+        '<div class="coach-step"><span class="cs-n">2</span><span class="cs-t"><b>Tap</b> to lock <b>POWER</b> — the higher the bar, the farther it flies.</span></div>' +
+        '<div class="coach-step"><span class="cs-n">3</span><span class="cs-t"><b>Tap</b> to <b>STRIKE</b> — catch the gold zone for a pure flush.</span></div>' +
+        '<div class="coach-foot">Tap the pulsing circle, or anywhere on screen.</div>' +
+        `<button class="btn" id="coachGo">${replay ? 'Got it' : "Let’s tee off"}</button>` +
+        '</div>',
+    );
+    const go = document.getElementById('coachGo');
+    if (go) go.addEventListener('click', (e) => { e.stopPropagation(); onGo(); });
   }
 
   /** Lefty/Righty toggle on the title — sets state.handed (moves the power meter

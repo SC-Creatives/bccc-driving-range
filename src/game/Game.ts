@@ -176,10 +176,23 @@ export class Game {
     this.dom.best.innerHTML = `${s.bestDrive}<span class="yd">yd</span>`;
   }
 
+  /** Title "tap to tee off" → show the one-time coach card on first play, else
+   *  go straight to the round. */
+  private beginPlay(): void {
+    if (this.dom.overlay.querySelector('.coach')) return; // already coaching
+    let coached = false;
+    try { coached = localStorage.getItem('bccc-coached') === '1'; } catch { /* no storage */ }
+    if (coached) { this.startRound(); return; }
+    this.overlay.showCoach(() => {
+      try { localStorage.setItem('bccc-coached', '1'); } catch { /* no storage */ }
+      this.startRound();
+    });
+  }
+
   // single-tap loop, ported verbatim
   private tap(): void {
     const s = this.state;
-    if (s.state === STATE.TITLE) return this.startRound();
+    if (s.state === STATE.TITLE) return this.beginPlay();
     if (s.state === STATE.ADDRESS) {
       s.state = STATE.POWER;
       this.audio.blip();
@@ -353,6 +366,7 @@ export class Game {
     this.dom.overlay.addEventListener('pointerdown', (e) => { downX = e.clientX; downY = e.clientY; });
     this.dom.overlay.addEventListener('pointerup', (e) => {
       if (s.state !== STATE.TITLE && s.state !== STATE.RESULT) return;
+      if (this.dom.overlay.querySelector('.coach')) return; // coach card → only its button advances
       if (Math.hypot(e.clientX - downX, e.clientY - downY) > 12) return; // a scroll/drag
       if ((e.target as HTMLElement | null)?.closest('button,input,.handed')) return; // a control
       this.tap();

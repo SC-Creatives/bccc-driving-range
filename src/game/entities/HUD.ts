@@ -55,9 +55,11 @@ export class HUD {
     this.liveDist.visible = false;
     this.hintText.visible = false;
 
+    // NOTE: the per-state top hint text is intentionally gone — the pulsing side
+    // TAP/LOCK IT/STRIKE button + the visual meters carry the in-the-moment cue,
+    // and the one-time "How to Play" coach card teaches it up front (Overlay).
     if (s.state === STATE.POWER) this.drawPowerMeter(s);
     if (s.state === STATE.CONTACT) this.drawContactMeter(s);
-    if (s.state === STATE.ADDRESS) this.drawHint('Tap to start your swing');
     if (s.state === STATE.FLIGHT) {
       this.liveDist.visible = true;
       this.liveDist.text = `${Math.round(s.ball.x / TUNING.PXY)} yd`;
@@ -90,7 +92,6 @@ export class HUD {
     this.g.rect(x, y, w, h).stroke({ width: 1, color: BONE });
     this.powerLabel.visible = true;
     this.powerLabel.position.set(onLeft ? x + w + 12 : x - 12, y + h / 2);
-    this.drawHint('Tap to set your power');
   }
 
   private drawContactMeter(s: GameState): void {
@@ -112,13 +113,5 @@ export class HUD {
     this.g.moveTo(nx, y - 6).lineTo(nx, y + h + 6).stroke({ width: 3, color: 0xfbf7ec });
     this.contactLabel.visible = true;
     this.contactLabel.position.set(x + w / 2, y - 14);
-  }
-
-  private drawHint(txt: string): void {
-    this.hintText.visible = true;
-    this.hintText.text = txt;
-    this.hintText.position.set(W / 2, 30);
-    const tw = this.hintText.width;
-    this.hintBg.roundRect(W / 2 - tw / 2 - 14, 16, tw + 28, 28, 14).fill({ color: 0x14261b, alpha: 0.8 });
   }
 }
