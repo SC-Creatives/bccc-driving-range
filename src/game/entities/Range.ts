@@ -122,12 +122,14 @@ export class Range {
       this.pinLabel.visible = false;
       return;
     }
-    // taller flagstick + bigger pennant (scaled up to read on the wide view)
-    const top = GROUND - 84;
+    // tall flagstick + pennant. A real flagstick stands taller than a person; the
+    // pin sits ~300yd downrange so perspective shrinks it, but 84px read stubby —
+    // 150px gives it proper flagstick height against the foreground golfer (228px).
+    const top = GROUND - 150;
     g.moveTo(sx, GROUND).lineTo(sx, top).stroke({ width: 3, color: 0xece3cf });
-    g.moveTo(sx, top).lineTo(sx + 42, top + 9).lineTo(sx, top + 19).closePath().fill(0xb8985a);
+    g.moveTo(sx, top).lineTo(sx + 44, top + 10).lineTo(sx, top + 21).closePath().fill(0xb8985a);
     g.ellipse(sx, GROUND + 1, 7, 2.5).fill({ color: 0x000000, alpha: 0.35 });
     this.pinLabel.visible = true;
-    this.pinLabel.position.set(sx + 15, top + 9);
+    this.pinLabel.position.set(sx + 16, top + 10);
   }
 }
