@@ -20,6 +20,12 @@ const VO_SLUG: Record<string, string> = {
   'PURE — Flushed It': 'pure',
 };
 
+// Each grade can have multiple announcer takes that shuffle so repeated drives in
+// the same band don't replay the same line. Take 1 is `<slug>.mp3`; add variety by
+// dropping `<slug>-2.mp3`, `<slug>-3.mp3`, … into public/assets/audio/vo/ (probed
+// up to this cap; the first missing index stops nothing — all present takes load).
+const MAX_VO_VARIANTS = 6;
+
 export class Audio {
   soundOn = false;
   private ctx: AudioContext | null = null;
@@ -27,7 +33,8 @@ export class Audio {
   private noiseBuf: AudioBuffer | null = null;
 
   private ambient: Howl | null = null;
-  private vo = new Map<string, Howl>();
+  private vo = new Map<string, Howl[]>(); // one or more takes per grade (shuffled)
+  private voLast = new Map<string, number>(); // last take index per slug — avoids back-to-back repeats
   private sfxClips = new Map<string, Howl>(); // crowd reactions (clap/cheer)
   private extrasProbed = false;
   private gestureHooked = false;
@@ -188,11 +195,9 @@ export class Audio {
       this.ambient = new Howl({ src: [`${this.base}assets/audio/ambient-loop.mp3`], loop: true, volume: 0.25 });
       if (this.soundOn) this.startAmbient();
     });
-    // announcer VO clips
+    // announcer VO clips (each grade may have several takes that shuffle)
     for (const slug of new Set(Object.values(VO_SLUG))) {
-      void this.exists(`${this.base}assets/audio/vo/${slug}.mp3`).then((ok) => {
-        if (ok) this.vo.set(slug, new Howl({ src: [`${this.base}assets/audio/vo/${slug}.mp3`], volume: 0.55 }));
-      });
+      void this.loadVoVariants(slug);
     }
     // crowd reactions: polite golf clap (300+) and full cheer (340+)
     for (const s of ['clap', 'cheer'] as const) {
@@ -212,6 +217,21 @@ export class Audio {
     if (this.soundOn) this.sfxClips.get('cheer')?.play();
   }
 
+  /** Load every announcer take for a grade: `<slug>.mp3` plus any `<slug>-2.mp3`,
+   *  `<slug>-3.mp3` … that exist (up to MAX_VO_VARIANTS). They probe in parallel;
+   *  whichever are present load and become the shuffle pool for that grade. */
+  private async loadVoVariants(slug: string): Promise<void> {
+    const names = [`${slug}.mp3`];
+    for (let i = 2; i <= MAX_VO_VARIANTS; i++) names.push(`${slug}-${i}.mp3`);
+    const present = await Promise.all(
+      names.map((name) => this.exists(`${this.base}assets/audio/vo/${name}`).then((ok) => (ok ? name : null))),
+    );
+    const takes = present
+      .filter((n): n is string => n !== null)
+      .map((name) => new Howl({ src: [`${this.base}assets/audio/vo/${name}`], volume: 0.55 }));
+    if (takes.length) this.vo.set(slug, takes);
+  }
+
   private async exists(url: string): Promise<boolean> {
     try {
       const r = await fetch(url, { method: 'HEAD' });
@@ -225,11 +245,22 @@ export class Audio {
     if (this.ambient && !this.ambient.playing()) this.ambient.play();
   }
 
-  /** Play the announcer line for a grade bucket, if its VO clip exists. */
+  /** Play an announcer line for a grade bucket. With multiple takes loaded, picks
+   *  one at random but never the same take twice in a row, so a player who keeps
+   *  landing in the same band hears variety instead of one looping line. */
   playVo(grade: string): void {
     if (!this.soundOn) return;
     const slug = VO_SLUG[grade];
-    const clip = slug && this.vo.get(slug);
-    if (clip) clip.play();
+    const takes = slug ? this.vo.get(slug) : undefined;
+    if (!takes || !takes.length) return;
+    let i = 0;
+    if (takes.length > 1) {
+      const last = this.voLast.get(slug) ?? -1;
+      do {
+        i = Math.floor(Math.random() * takes.length);
+      } while (i === last);
+    }
+    this.voLast.set(slug, i);
+    takes[i].play();
   }
 }
