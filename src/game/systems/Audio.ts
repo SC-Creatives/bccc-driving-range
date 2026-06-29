@@ -26,6 +26,23 @@ const VO_SLUG: Record<string, string> = {
 // up to this cap; the first missing index stops nothing — all present takes load).
 const MAX_VO_VARIANTS = 6;
 
+// Back-to-back variety WITHOUT new recordings: when the same grade fires several
+// times in a row, rotate through these slugs instead of replaying one line. Index
+// 0 is the grade's own line (first hit); each consecutive repeat advances one step
+// and wraps. Neighbors are picked to stay tonally on-brand — bad lines borrow other
+// bad lines, big lines borrow other big lines — so the swap never over/under-praises.
+// The streak resets the moment a different grade is hit (only *consecutive* repeats
+// vary). Reorder/extend any row to taste; every slug here is already recorded.
+const VO_ROTATION: Record<string, string[]> = {
+  'Shanked It': ['shanked', 'wormburner'],
+  'Worm Burner': ['wormburner', 'shanked'],
+  'On the Short Grass': ['shortgrass', 'wormburner'],
+  Respectable: ['respectable', 'shortgrass'],
+  'Now That’s Clubhouse Talk': ['clubhouse', 'cannon'],
+  'Absolute Cannon': ['cannon', 'clubhouse'],
+  'PURE — Flushed It': ['pure', 'cannon'],
+};
+
 export class Audio {
   soundOn = false;
   private ctx: AudioContext | null = null;
@@ -35,6 +52,8 @@ export class Audio {
   private ambient: Howl | null = null;
   private vo = new Map<string, Howl[]>(); // one or more takes per grade (shuffled)
   private voLast = new Map<string, number>(); // last take index per slug — avoids back-to-back repeats
+  private lastVoGrade = ''; // grade of the previous shot — detects consecutive repeats
+  private voStreak = 0; // consecutive count of the current grade — indexes VO_ROTATION
   private sfxClips = new Map<string, Howl>(); // crowd reactions (clap/cheer)
   private extrasProbed = false;
   private gestureHooked = false;
@@ -245,13 +264,26 @@ export class Audio {
     if (this.ambient && !this.ambient.playing()) this.ambient.play();
   }
 
-  /** Play an announcer line for a grade bucket. With multiple takes loaded, picks
-   *  one at random but never the same take twice in a row, so a player who keeps
-   *  landing in the same band hears variety instead of one looping line. */
+  /** Play an announcer line for a grade bucket. Consecutive repeats of the same
+   *  grade rotate through VO_ROTATION (a 2nd shank borrows the worm-burner line,
+   *  etc.) so a player stuck in one band doesn't hear the identical clip looping.
+   *  The streak resets when a different grade is hit. */
   playVo(grade: string): void {
     if (!this.soundOn) return;
-    const slug = VO_SLUG[grade];
-    const takes = slug ? this.vo.get(slug) : undefined;
+    const rotation = VO_ROTATION[grade] ?? (VO_SLUG[grade] ? [VO_SLUG[grade]] : null);
+    if (!rotation) return;
+    if (grade === this.lastVoGrade) this.voStreak++;
+    else {
+      this.lastVoGrade = grade;
+      this.voStreak = 0;
+    }
+    this.playSlug(rotation[this.voStreak % rotation.length]);
+  }
+
+  /** Play one take for a slug; with multiple takes loaded, picks at random but
+   *  never the same take twice in a row. */
+  private playSlug(slug: string): void {
+    const takes = this.vo.get(slug);
     if (!takes || !takes.length) return;
     let i = 0;
     if (takes.length > 1) {
