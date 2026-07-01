@@ -1,11 +1,20 @@
 # Blue Collar Country Club — The Driving Range
 
-PixiJS rebuild of the validated prototype. **Phase 1 (MVP) is complete and runs.**
-The engraved look matches the prototype's grade; the swing mechanic, physics, and
-tuning are ported verbatim; it builds to a static bundle that embeds via iframe.
+> **👉 Handing this off or new to the project? Read [`HANDOFF.md`](HANDOFF.md) first.**
+> It's the current-state guide: live URL, deploy pipeline, content/tuning playbook,
+> and the one remaining launch task (the backend).
+>
+> **Live:** https://sc-creatives.github.io/bccc-driving-range/ · auto-deploys on push to `main`.
 
-See `BUILD.md` for the full spec and `reference/` for the source-of-truth prototype
-and the backend / illustrator briefs.
+PixiJS rebuild of the validated prototype. The engraved look matches the prototype's
+grade; the swing mechanic, physics, and tuning are ported verbatim; it builds to a
+static bundle that embeds via iframe.
+
+**Since this README was first written, a lot shipped** — authored art, full audio +
+announcer VO, the cinematic intro, and live GitHub Pages deploy. The "Phase 1 / Phase 2"
+framing below is **historical**; see `HANDOFF.md` for what's actually done vs. left.
+`BUILD.md` remains the architecture reference; `reference/` holds the source-of-truth
+prototype and the backend / illustrator briefs.
 
 ## Run
 
