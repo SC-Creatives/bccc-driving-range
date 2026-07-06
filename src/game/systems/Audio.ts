@@ -256,17 +256,32 @@ export class Audio {
 
   /** Load every announcer take for a grade: `<slug>.mp3` plus any `<slug>-2.mp3`,
    *  `<slug>-3.mp3` … that exist (up to MAX_VO_VARIANTS). They probe in parallel;
-   *  whichever are present load and become the shuffle pool for that grade. */
+   *  whichever are present load and become the shuffle pool for that grade.
+   *  Probes that MISS are retried once after a beat and merged back in — on a
+   *  flaky mobile network a transient miss otherwise collapses the pool (e.g. to
+   *  a single cannon take), which is the only way a line can repeat back-to-back. */
   private async loadVoVariants(slug: string): Promise<void> {
     const names = [`${slug}.mp3`];
     for (let i = 2; i <= MAX_VO_VARIANTS; i++) names.push(`${slug}-${i}.mp3`);
-    const present = await Promise.all(
-      names.map((name) => this.exists(`${this.base}assets/audio/vo/${name}`).then((ok) => (ok ? name : null))),
-    );
-    const takes = present
-      .filter((n): n is string => n !== null)
-      .map((name) => ({ name, howl: new Howl({ src: [`${this.base}assets/audio/vo/${name}`], volume: 0.55 }) }));
-    if (takes.length) this.vo.set(slug, takes);
+    const url = (n: string): string => `${this.base}assets/audio/vo/${n}`;
+    const mk = (name: string): { name: string; howl: Howl } => ({
+      name,
+      howl: new Howl({ src: [url(name)], volume: 0.55 }),
+    });
+    const present = await Promise.all(names.map((n) => this.exists(url(n)).then((ok) => (ok ? n : null))));
+    const takes = present.filter((n): n is string => n !== null).map(mk);
+    if (takes.length) this.vo.set(slug, takes); // register what we have immediately
+    const missing = names.filter((_, i) => !present[i]);
+    if (!missing.length) return;
+    await new Promise((r) => setTimeout(r, 1500));
+    const retried = await Promise.all(missing.map((n) => this.exists(url(n)).then((ok) => (ok ? n : null))));
+    const late = retried.filter((n): n is string => n !== null).map(mk);
+    if (late.length) {
+      const merged = [...(this.vo.get(slug) ?? []), ...late].sort(
+        (a, b) => names.indexOf(a.name) - names.indexOf(b.name),
+      );
+      this.vo.set(slug, merged);
+    }
   }
 
   private async exists(url: string): Promise<boolean> {
