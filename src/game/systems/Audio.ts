@@ -42,7 +42,10 @@ const VO_ROTATION: Record<string, string[]> = {
   'Worm Burner': ['wormburner', 'shortgrass', 'shanked'],
   'On the Short Grass': ['shortgrass', 'wormburner', 'shanked'],
   Respectable: ['respectable'],
-  'Now That’s Clubhouse Talk': ['clubhouse'],
+  // clubhouse currently has ONE distinct line (base and -3 are two takes of the
+  // same joke) — a repeat borrows a cannon line (praise-adjacent) rather than
+  // replaying it. Drop this back to ['clubhouse'] once a 2nd line is recorded.
+  'Now That’s Clubhouse Talk': ['clubhouse', 'cannon'],
   'Absolute Cannon': ['cannon'],
   'PURE — Flushed It': ['pure'],
 };
@@ -61,6 +64,22 @@ const VO_STREAK_GROUP: Record<string, string> = {
 // guarantee (replaces the old per-file "follow-up only" gate): some alternates
 // only read as follow-ups, and a gate keyed to a specific filename is blind to
 // any content/label mix-up at recording or export time.
+
+// Some files are different TAKES of the SAME line (verified by audio
+// cross-correlation, 2026-07-06) — playing two of them in a row sounds like a
+// repeat even though the filenames differ. Files sharing a group id here never
+// play consecutively; files not listed are their own group (all distinct lines).
+const VO_LINE_GROUP: Record<string, string> = {
+  'shanked.mp3': 'shanked-line-1',
+  'shanked-2.mp3': 'shanked-line-1',
+  'wormburner.mp3': 'wormburner-line-1',
+  'wormburner-2.mp3': 'wormburner-line-1',
+  'shortgrass.mp3': 'shortgrass-line-1',
+  'shortgrass-4.mp3': 'shortgrass-line-1',
+  'clubhouse.mp3': 'clubhouse-line-1',
+  'clubhouse-3.mp3': 'clubhouse-line-1',
+};
+const lineGroup = (name: string): string => VO_LINE_GROUP[name] ?? name;
 
 export class Audio {
   soundOn = false;
@@ -304,8 +323,9 @@ export class Audio {
 
   /** Play one take for a slug. The FIRST play of a session is always the base
    *  take (`<slug>.mp3`) — alternates can never open a grade, no matter how the
-   *  files are labeled. Subsequent plays shuffle all takes, never repeating the
-   *  same take twice in a row. */
+   *  files are labeled. Subsequent plays shuffle all takes, never following a
+   *  take with another take of the same LINE (VO_LINE_GROUP — two deliveries of
+   *  one joke read as a repeat even though the files differ). */
   private playSlug(slug: string): void {
     const takes = this.vo.get(slug);
     if (!takes || !takes.length) return;
@@ -314,8 +334,8 @@ export class Audio {
       pick = takes.find((t) => t.name === `${slug}.mp3`) ?? takes[0];
     } else {
       const last = this.voLast.get(slug);
-      let pool = takes.filter((t) => t.name !== last);
-      if (!pool.length) pool = takes; // single-take grade: repeat is unavoidable
+      let pool = last === undefined ? takes : takes.filter((t) => lineGroup(t.name) !== lineGroup(last));
+      if (!pool.length) pool = takes; // single-line grade: repeat is unavoidable
       pick = pool[Math.floor(Math.random() * pool.length)];
     }
     this.voLast.set(slug, pick.name);

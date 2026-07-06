@@ -28,6 +28,20 @@ function voManifest(): PluginOption {
     load(source) {
       return source === `\0${id}` ? `export default ${JSON.stringify(read())};` : undefined;
     },
+    // dev: re-read the folder when takes are added/removed, so the running dev
+    // server never serves a stale manifest (production reads at build time)
+    configureServer(server) {
+      const dir = fileURLToPath(new URL('./public/assets/audio/vo', import.meta.url));
+      server.watcher.add(dir);
+      const refresh = (file: string): void => {
+        if (!file.includes('assets/audio/vo')) return;
+        const mod = server.moduleGraph.getModuleById(`\0${id}`);
+        if (mod) server.moduleGraph.invalidateModule(mod);
+        server.ws.send({ type: 'full-reload' });
+      };
+      server.watcher.on('add', refresh);
+      server.watcher.on('unlink', refresh);
+    },
   };
 }
 
