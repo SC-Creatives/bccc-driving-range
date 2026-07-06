@@ -30,16 +30,19 @@ const MAX_VO_VARIANTS = 6;
 // rotate through these slugs instead of replaying one line. Index 0 is the
 // grade's own line (first hit); each consecutive repeat advances one step and
 // wraps. The three "bad shot" grades cycle through ALL bad-shot lines (shanked /
-// wormburner / shortgrass share one pool); big lines borrow other big lines — so
-// the swap never over/under-praises. Reorder/extend any row to taste.
+// wormburner / shortgrass share one pool — owner call). The mid/high grades stay
+// in their OWN lane: each has 3-4 recorded takes now, and hearing another
+// grade's line on a good drive read as a mismatch (cross-grade borrowing was a
+// stopgap from the single-take days). Their variety comes from the per-slug
+// take shuffle in playSlug.
 const VO_ROTATION: Record<string, string[]> = {
   'Shanked It': ['shanked', 'wormburner', 'shortgrass'],
   'Worm Burner': ['wormburner', 'shortgrass', 'shanked'],
   'On the Short Grass': ['shortgrass', 'wormburner', 'shanked'],
-  Respectable: ['respectable', 'shortgrass'],
-  'Now That’s Clubhouse Talk': ['clubhouse', 'cannon'],
-  'Absolute Cannon': ['cannon', 'clubhouse'],
-  'PURE — Flushed It': ['pure', 'cannon'],
+  Respectable: ['respectable'],
+  'Now That’s Clubhouse Talk': ['clubhouse'],
+  'Absolute Cannon': ['cannon'],
+  'PURE — Flushed It': ['pure'],
 };
 
 // Grades that share a streak: any consecutive run WITHIN the group advances the
