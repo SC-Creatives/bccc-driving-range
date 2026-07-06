@@ -52,10 +52,12 @@ const VO_STREAK_GROUP: Record<string, string> = {
 };
 
 // Takes that only work as a FOLLOW-UP line (they presume an earlier shot), keyed
-// by slug -> 0-based take indices, excluded until that slug has played once this
-// session. respectable[2] = respectable-3.mp3 (recorded as "Respectable 4").
-const VO_FOLLOWUP_ONLY: Record<string, number[]> = {
-  respectable: [2],
+// by slug -> FILENAMES excluded until that slug has played once this session.
+// Keyed by name (not load index) so a transient probe miss on another take can't
+// shift positions and let a gated take through.
+// respectable-3.mp3 was recorded as "Respectable 4".
+const VO_FOLLOWUP_ONLY: Record<string, string[]> = {
+  respectable: ['respectable-3.mp3'],
 };
 
 export class Audio {
@@ -65,7 +67,7 @@ export class Audio {
   private noiseBuf: AudioBuffer | null = null;
 
   private ambient: Howl | null = null;
-  private vo = new Map<string, Howl[]>(); // one or more takes per grade (shuffled)
+  private vo = new Map<string, { howl: Howl; name: string }[]>(); // takes per grade (shuffled)
   private voLast = new Map<string, number>(); // last take index per slug — avoids back-to-back repeats
   private voPlayed = new Set<string>(); // slugs heard this session — gates VO_FOLLOWUP_ONLY takes
   private lastVoGrade = ''; // grade of the previous shot — detects consecutive repeats
@@ -263,7 +265,7 @@ export class Audio {
     );
     const takes = present
       .filter((n): n is string => n !== null)
-      .map((name) => new Howl({ src: [`${this.base}assets/audio/vo/${name}`], volume: 0.55 }));
+      .map((name) => ({ name, howl: new Howl({ src: [`${this.base}assets/audio/vo/${name}`], volume: 0.55 }) }));
     if (takes.length) this.vo.set(slug, takes);
   }
 
@@ -304,10 +306,11 @@ export class Audio {
   private playSlug(slug: string): void {
     const takes = this.vo.get(slug);
     if (!takes || !takes.length) return;
-    // candidate pool: exclude follow-up-only takes until this slug has been heard
-    // once, and exclude the previous take (no back-to-back repeats)
+    // candidate pool: exclude follow-up-only takes (BY FILENAME — robust against
+    // load-order shifts) until this slug has been heard once, and exclude the
+    // previous take (no back-to-back repeats)
     const followup = this.voPlayed.has(slug) ? [] : (VO_FOLLOWUP_ONLY[slug] ?? []);
-    let pool = takes.map((_, i) => i).filter((i) => !followup.includes(i));
+    let pool = takes.map((_, i) => i).filter((i) => !followup.includes(takes[i].name));
     if (!pool.length) pool = takes.map((_, i) => i); // safety: never end up empty
     if (pool.length > 1) {
       const last = this.voLast.get(slug) ?? -1;
@@ -316,6 +319,6 @@ export class Audio {
     const i = pool[Math.floor(Math.random() * pool.length)];
     this.voLast.set(slug, i);
     this.voPlayed.add(slug);
-    takes[i].play();
+    takes[i].howl.play();
   }
 }
