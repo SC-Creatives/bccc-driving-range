@@ -15,10 +15,10 @@ export const TUNING = {
   PIN_MARKER_YD: 273,
 
   // ---- swing meters ----
-  // eased 2026-06-08 (owner calls): power 1.62->1.40->1.55; contact 2.55->2.25->2.0->1.85 —
+  // eased 2026-06-08 (owner calls): power 1.62->1.40->1.55; contact 2.55->2.25->2.0->1.85->2.05 —
   // the meters are the difficulty knob (NOT the distance model, which stays as-is)
   powerSpeed: 1.55, // power oscillation speed
-  contactSpeed: 1.85, // contact needle sweep speed (skill gate)
+  contactSpeed: 2.05, // contact needle sweep speed (skill gate)
   SWEET: 0.5, // center of the contact sweet zone (0..1 across the bar)
   SWEET_W: 0.105, // half-width of the sweet zone (~21% of the bar)
   contactForgiveness: 0.85, // Q = 1 - off/SWEET_W * this
