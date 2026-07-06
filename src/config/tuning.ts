@@ -60,11 +60,11 @@ export const TUNING = {
   // Horizontal speed shape through the carry (owner call 2026-07-06: real ball
   // physics — hot off the face, decelerating into the landing, not constant).
   // progress e = mix*(1-(1-p)^pow) + (1-mix)*p  ->  launch ~1.9x the average
-  // speed, touchdown ~0.4x (touchdown = 1-mix; 0.25x stalled too hard right at
-  // the landing — owner call). Also shifts the apex forward / steepens the
-  // descent in distance terms, like a real drive under drag. Presentation only.
-  carryEasePow: 2.4, // ease-out exponent (higher = punchier launch)
-  carryEaseMix: 0.62, // ease vs linear blend (1 = full ease, 0 = old constant speed)
+  // speed, touchdown ~0.5x (touchdown = 1-mix; 0.25x then 0.4x both caught/
+  // stalled right at the landing — owner calls). Also shifts the apex forward /
+  // steepens the descent in distance terms, like a real drive. Presentation only.
+  carryEasePow: 2.8, // ease-out exponent (higher = punchier launch)
+  carryEaseMix: 0.5, // ease vs linear blend (1 = full ease, 0 = old constant speed)
   rollDurBase: 0.7, // rollDur = base + (totalPx - carryPx)/rollDurDiv
   rollDurDiv: 450,
 
