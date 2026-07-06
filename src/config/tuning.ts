@@ -47,12 +47,12 @@ export const TUNING = {
   // flight shape
   carryFracBase: 0.82, // fraction of total that is carry (+ carryFracQ*Q)
   carryFracQ: 0.06,
-  // raised 2026-07-06 (owner call: more height) — min 50->60, max 210->265,
-  // factor 0.92->1.05. A flushed bomb now peaks up among the clouds (~y=110 of
-  // the 460 frame) instead of mid-sky. Purely visual; distances unchanged.
-  apexMin: 60,
-  apexMax: 265,
-  apexFactor: 1.05, // apex ~ resultYd * apexFactor * (0.7 + 0.3*Q)
+  // raised 2026-07-06 (owner calls: more height, then higher still) —
+  // 50/210/0.92 -> 60/265/1.05 -> 70/305/1.15. A flushed bomb now peaks just
+  // above the clouds (~y=70 of the 460 frame). Purely visual; distances unchanged.
+  apexMin: 70,
+  apexMax: 305,
+  apexFactor: 1.15, // apex ~ resultYd * apexFactor * (0.7 + 0.3*Q)
   apexQMin: 0.7,
   apexQRange: 0.3,
   // stretched 2026-07-06 (owner calls: more hang time, then floatier still) —
