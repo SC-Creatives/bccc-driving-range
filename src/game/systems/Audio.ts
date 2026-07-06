@@ -51,6 +51,13 @@ const VO_STREAK_GROUP: Record<string, string> = {
   'On the Short Grass': 'bad-shot',
 };
 
+// Takes that only work as a FOLLOW-UP line (they presume an earlier shot), keyed
+// by slug -> 0-based take indices, excluded until that slug has played once this
+// session. respectable[2] = respectable-3.mp3 (recorded as "Respectable 4").
+const VO_FOLLOWUP_ONLY: Record<string, number[]> = {
+  respectable: [2],
+};
+
 export class Audio {
   soundOn = false;
   private ctx: AudioContext | null = null;
@@ -60,6 +67,7 @@ export class Audio {
   private ambient: Howl | null = null;
   private vo = new Map<string, Howl[]>(); // one or more takes per grade (shuffled)
   private voLast = new Map<string, number>(); // last take index per slug — avoids back-to-back repeats
+  private voPlayed = new Set<string>(); // slugs heard this session — gates VO_FOLLOWUP_ONLY takes
   private lastVoGrade = ''; // grade of the previous shot — detects consecutive repeats
   private voStreak = 0; // consecutive count of the current grade — indexes VO_ROTATION
   private sfxClips = new Map<string, Howl>(); // crowd reactions (clap/cheer)
@@ -296,14 +304,18 @@ export class Audio {
   private playSlug(slug: string): void {
     const takes = this.vo.get(slug);
     if (!takes || !takes.length) return;
-    let i = 0;
-    if (takes.length > 1) {
+    // candidate pool: exclude follow-up-only takes until this slug has been heard
+    // once, and exclude the previous take (no back-to-back repeats)
+    const followup = this.voPlayed.has(slug) ? [] : (VO_FOLLOWUP_ONLY[slug] ?? []);
+    let pool = takes.map((_, i) => i).filter((i) => !followup.includes(i));
+    if (!pool.length) pool = takes.map((_, i) => i); // safety: never end up empty
+    if (pool.length > 1) {
       const last = this.voLast.get(slug) ?? -1;
-      do {
-        i = Math.floor(Math.random() * takes.length);
-      } while (i === last);
+      pool = pool.filter((i) => i !== last);
     }
+    const i = pool[Math.floor(Math.random() * pool.length)];
     this.voLast.set(slug, i);
+    this.voPlayed.add(slug);
     takes[i].play();
   }
 }
