@@ -37,10 +37,11 @@ export const Reward = {
       s.resultGrade = 'Worm Burner';
       s.resultLine = '“It went forward. We’re calling that a positive.”';
     }
-    // PURE is the pinnacle: an elite strike AND a true bomb. Floor raised
-    // 300 -> CHEER_THRESHOLD (340) 2026-07-06 — the perfect-lock snap made
-    // flushed strikes common enough that PURE was firing on ordinary 300-330
-    // drives (owner call at a 331). Now PURE and the crowd roar land together.
-    if (Q >= 0.97 && yd >= TUNING.CHEER_THRESHOLD) s.resultGrade = 'PURE — Flushed It';
+    // PURE is the top DISTANCE tier: any 340+ bomb (owner calls 2026-07-06 — a
+    // 343 with slightly-off contact graded Cannon while the crowd roared; the
+    // hidden Q gate made the peak moments mismatch). PURE and the crowd roar
+    // now always land together. No Q check: a sub-0.32 strike can't physically
+    // reach 340 (max ~240), so the shank guard above already covers it.
+    if (yd >= TUNING.CHEER_THRESHOLD) s.resultGrade = 'PURE — Flushed It';
   },
 };
