@@ -71,7 +71,9 @@ export class Audio {
 
   private ambient: Howl | null = null;
   private vo = new Map<string, { howl: Howl; name: string }[]>(); // takes per grade (shuffled)
-  private voLast = new Map<string, number>(); // last take index per slug — avoids back-to-back repeats
+  private voLast = new Map<string, string>(); // last take FILENAME per slug — avoids back-to-back
+  // repeats. By name, not index: the probe-retry merge re-orders the takes array,
+  // so a stored index can silently point at a different file after a merge.
   private voPlayed = new Set<string>(); // slugs heard this session — gates VO_FOLLOWUP_ONLY takes
   private lastVoGrade = ''; // grade of the previous shot — detects consecutive repeats
   private voStreak = 0; // consecutive count of the current grade — indexes VO_ROTATION
@@ -331,11 +333,11 @@ export class Audio {
     let pool = takes.map((_, i) => i).filter((i) => !followup.includes(takes[i].name));
     if (!pool.length) pool = takes.map((_, i) => i); // safety: never end up empty
     if (pool.length > 1) {
-      const last = this.voLast.get(slug) ?? -1;
-      pool = pool.filter((i) => i !== last);
+      const last = this.voLast.get(slug);
+      pool = pool.filter((i) => takes[i].name !== last);
     }
     const i = pool[Math.floor(Math.random() * pool.length)];
-    this.voLast.set(slug, i);
+    this.voLast.set(slug, takes[i].name);
     this.voPlayed.add(slug);
     takes[i].howl.play();
   }
