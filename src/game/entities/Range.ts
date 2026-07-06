@@ -118,19 +118,29 @@ export class Range {
   }
 
   private drawPin(g: Graphics, s: GameState, yd: number): void {
-    const sx = Camera.worldToScreen(s, yd * TUNING.PXY);
+    const pinPx = yd * TUNING.PXY;
+    const sx = Camera.worldToScreen(s, pinPx);
     if (sx < -30 || sx > W + 30) {
       this.pinLabel.visible = false;
       return;
     }
-    // tall flagstick + pennant. A real flagstick stands taller than a person; the
-    // pin sits ~300yd downrange so perspective shrinks it, but 84px read stubby —
-    // 150px gives it proper flagstick height against the foreground golfer (228px).
-    const top = GROUND - 150;
-    g.moveTo(sx, GROUND).lineTo(sx, top).stroke({ width: 3, color: 0xece3cf });
-    g.moveTo(sx, top).lineTo(sx + 44, top + 10).lineTo(sx, top + 21).closePath().fill(0xb8985a);
-    g.ellipse(sx, GROUND + 1, 7, 2.5).fill({ color: 0x000000, alpha: 0.35 });
-    this.pinLabel.visible = true;
-    this.pinLabel.position.set(sx + 16, top + 10);
+    // Faked depth: the pin reads far downrange until the camera closes in. Scale
+    // by its distance ahead of the camera window — enters the frame small and
+    // lifted toward the horizon, grows to full size (150px stick, taller than a
+    // person up close) as the chase approaches. Sells the flight as covering
+    // ground; purely visual, the world mapping/scoring is untouched.
+    const dist = Math.max(0, pinPx - s.cameraX); // px ahead of the camera
+    const t = Math.min(1, Math.max(0, (dist - 320) / (1100 - 320))); // 0 near .. 1 far
+    const k = 1 - 0.58 * t; // scale: 1.0 up close .. 0.42 at the far limit
+    const base = GROUND - (1 - k) * 26; // far pin sits up toward the horizon
+    const top = base - 150 * k;
+    g.moveTo(sx, base).lineTo(sx, top).stroke({ width: Math.max(1.2, 3 * k), color: 0xece3cf });
+    g.moveTo(sx, top).lineTo(sx + 44 * k, top + 10 * k).lineTo(sx, top + 21 * k).closePath().fill(0xb8985a);
+    g.ellipse(sx, base + 1, 7 * k, 2.5 * k).fill({ color: 0x000000, alpha: 0.35 });
+    this.pinLabel.visible = k > 0.55; // "BC" is unreadable when tiny — show it as we arrive
+    if (this.pinLabel.visible) {
+      this.pinLabel.scale.set(k);
+      this.pinLabel.position.set(sx + 16 * k, top + 10 * k);
+    }
   }
 }
