@@ -56,14 +56,11 @@ const VO_STREAK_GROUP: Record<string, string> = {
   'On the Short Grass': 'bad-shot',
 };
 
-// Takes that only work as a FOLLOW-UP line (they presume an earlier shot), keyed
-// by slug -> FILENAMES excluded until that slug has played once this session.
-// Keyed by name (not load index) so a transient probe miss on another take can't
-// shift positions and let a gated take through.
-// respectable-3.mp3 was recorded as "Respectable 4".
-const VO_FOLLOWUP_ONLY: Record<string, string[]> = {
-  respectable: ['respectable-3.mp3'],
-};
+// NOTE: alternates never open — the FIRST line a session hears for any grade is
+// always the base take (`<slug>.mp3`); see playSlug. This is a structural
+// guarantee (replaces the old per-file "follow-up only" gate): some alternates
+// only read as follow-ups, and a gate keyed to a specific filename is blind to
+// any content/label mix-up at recording or export time.
 
 export class Audio {
   soundOn = false;
@@ -305,24 +302,24 @@ export class Audio {
     this.playSlug(rotation[this.voStreak % rotation.length]);
   }
 
-  /** Play one take for a slug; with multiple takes loaded, picks at random but
-   *  never the same take twice in a row. */
+  /** Play one take for a slug. The FIRST play of a session is always the base
+   *  take (`<slug>.mp3`) — alternates can never open a grade, no matter how the
+   *  files are labeled. Subsequent plays shuffle all takes, never repeating the
+   *  same take twice in a row. */
   private playSlug(slug: string): void {
     const takes = this.vo.get(slug);
     if (!takes || !takes.length) return;
-    // candidate pool: exclude follow-up-only takes (BY FILENAME — robust against
-    // load-order shifts) until this slug has been heard once, and exclude the
-    // previous take (no back-to-back repeats)
-    const followup = this.voPlayed.has(slug) ? [] : (VO_FOLLOWUP_ONLY[slug] ?? []);
-    let pool = takes.map((_, i) => i).filter((i) => !followup.includes(takes[i].name));
-    if (!pool.length) pool = takes.map((_, i) => i); // safety: never end up empty
-    if (pool.length > 1) {
+    let pick: { name: string; howl: Howl };
+    if (!this.voPlayed.has(slug)) {
+      pick = takes.find((t) => t.name === `${slug}.mp3`) ?? takes[0];
+    } else {
       const last = this.voLast.get(slug);
-      pool = pool.filter((i) => takes[i].name !== last);
+      let pool = takes.filter((t) => t.name !== last);
+      if (!pool.length) pool = takes; // single-take grade: repeat is unavoidable
+      pick = pool[Math.floor(Math.random() * pool.length)];
     }
-    const i = pool[Math.floor(Math.random() * pool.length)];
-    this.voLast.set(slug, takes[i].name);
+    this.voLast.set(slug, pick.name);
     this.voPlayed.add(slug);
-    takes[i].howl.play();
+    pick.howl.play();
   }
 }
