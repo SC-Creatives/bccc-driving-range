@@ -73,21 +73,17 @@ export class Range {
     const g = this.dynamic;
     g.clear();
 
-    // yard posts (tick + label) — on the same perspective curve as the pin, so
-    // the whole ground plane recedes consistently and the pan reads as approach
+    // yard posts (tick + label)
     for (const t of this.postLabels) {
       const yd = (t as Text & { _yd: number })._yd;
-      const px = yd * TUNING.PXY;
-      const sx = Camera.worldToScreen(s, px);
+      const sx = Camera.worldToScreen(s, yd * TUNING.PXY);
       if (sx < -20 || sx > W + 20) {
         t.visible = false;
         continue;
       }
-      const { k, base } = this.perspective(s, px);
       t.visible = true;
-      t.scale.set(k);
-      t.position.set(sx, base - 18 * k);
-      g.moveTo(sx, base).lineTo(sx, base - 14 * k).stroke({ width: Math.max(0.7, k), color: 0xece3cf, alpha: 0.35 });
+      t.position.set(sx, GROUND - 18);
+      g.moveTo(sx, GROUND).lineTo(sx, GROUND - 14).stroke({ width: 1, color: 0xece3cf, alpha: 0.35 });
     }
 
     // previous shot scatter
@@ -110,7 +106,7 @@ export class Range {
     }
 
     // pin + pennant (decorative; beyond the max drive and outside the address
-    // frame — the camera chase brings it into view, growing via perspective())
+    // frame — the camera chase brings it into view during flight)
     this.drawPin(g, s, TUNING.PIN_MARKER_YD);
 
     // divot / landing puffs
@@ -121,36 +117,20 @@ export class Range {
     }
   }
 
-  /** Faked-depth scale for ground features by distance ahead of the camera:
-   *  k = 1.0 up close .. 0.42 at the far limit, with the feature's ground point
-   *  lifted toward the horizon as it recedes. Shared by the pin and the yard
-   *  posts so the whole plane recedes on one curve. Purely visual — the world
-   *  mapping/scoring is untouched. */
-  private perspective(s: GameState, worldPx: number): { k: number; base: number } {
-    const dist = Math.max(0, worldPx - s.cameraX); // px ahead of the camera
-    const t = Math.min(1, Math.max(0, (dist - 320) / (1100 - 320))); // 0 near .. 1 far
-    const k = 1 - 0.58 * t;
-    return { k, base: GROUND - (1 - k) * 26 };
-  }
-
   private drawPin(g: Graphics, s: GameState, yd: number): void {
-    const pinPx = yd * TUNING.PXY;
-    const sx = Camera.worldToScreen(s, pinPx);
+    const sx = Camera.worldToScreen(s, yd * TUNING.PXY);
     if (sx < -30 || sx > W + 30) {
       this.pinLabel.visible = false;
       return;
     }
-    // Enters the frame small near the horizon, grows to full size (150px stick,
-    // taller than a person up close) as the camera chase approaches.
-    const { k, base } = this.perspective(s, pinPx);
-    const top = base - 150 * k;
-    g.moveTo(sx, base).lineTo(sx, top).stroke({ width: Math.max(1.2, 3 * k), color: 0xece3cf });
-    g.moveTo(sx, top).lineTo(sx + 44 * k, top + 10 * k).lineTo(sx, top + 21 * k).closePath().fill(0xb8985a);
-    g.ellipse(sx, base + 1, 7 * k, 2.5 * k).fill({ color: 0x000000, alpha: 0.35 });
-    this.pinLabel.visible = k > 0.55; // "BC" is unreadable when tiny — show it as we arrive
-    if (this.pinLabel.visible) {
-      this.pinLabel.scale.set(k);
-      this.pinLabel.position.set(sx + 16 * k, top + 10 * k);
-    }
+    // tall flagstick + pennant. A real flagstick stands taller than a person; the
+    // pin sits ~300yd downrange so perspective shrinks it, but 84px read stubby —
+    // 150px gives it proper flagstick height against the foreground golfer (228px).
+    const top = GROUND - 150;
+    g.moveTo(sx, GROUND).lineTo(sx, top).stroke({ width: 3, color: 0xece3cf });
+    g.moveTo(sx, top).lineTo(sx + 44, top + 10).lineTo(sx, top + 21).closePath().fill(0xb8985a);
+    g.ellipse(sx, GROUND + 1, 7, 2.5).fill({ color: 0x000000, alpha: 0.35 });
+    this.pinLabel.visible = true;
+    this.pinLabel.position.set(sx + 16, top + 10);
   }
 }
