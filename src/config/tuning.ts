@@ -24,6 +24,11 @@ export const TUNING = {
   SWEET: 0.5, // center of the contact sweet zone (0..1 across the bar)
   SWEET_W: 0.105, // half-width of the sweet zone (~21% of the bar)
   contactForgiveness: 0.85, // Q = 1 - off/SWEET_W * this
+  // Perfect-lock snap windows (2026-07-06): a mathematically exact double-perfect
+  // (P=1.000, Q=1.000 -> the 358 ceiling) was a sub-millisecond frame lottery —
+  // tap close enough and it counts as perfect, so the max is earned by skill.
+  powerSnap: 0.98, // lock at >= this -> P = 1.0 (~40ms window at the peak)
+  contactSnapOff: 0.0084, // |contact-0.5| <= this -> Q = 1.0 (SWEET_W * 0.08)
 
   // ---- swing animation timing (drives swingAngle + frame mapping) ----
   contactEase: 11, // how fast the club eases to top-of-backswing while aiming
