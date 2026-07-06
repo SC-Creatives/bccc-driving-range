@@ -1,4 +1,5 @@
 import { Howl, Howler } from 'howler';
+import VO_FILES from 'virtual:vo-manifest';
 
 /**
  * Audio — a procedural WebAudio SFX engine (synthesized, no asset files needed)
@@ -22,9 +23,10 @@ const VO_SLUG: Record<string, string> = {
 
 // Each grade can have multiple announcer takes that shuffle so repeated drives in
 // the same band don't replay the same line. Take 1 is `<slug>.mp3`; add variety by
-// dropping `<slug>-2.mp3`, `<slug>-3.mp3`, … into public/assets/audio/vo/ (probed
-// up to this cap; the first missing index stops nothing — all present takes load).
-const MAX_VO_VARIANTS = 6;
+// dropping `<slug>-2.mp3`, `<slug>-3.mp3`, … into public/assets/audio/vo/ — the
+// list is baked in at BUILD time (virtual:vo-manifest), so the pool is always
+// complete. (The old boot-time URL probing could transiently miss a file on a
+// flaky network, collapsing a grade's pool down to repeats of one clip.)
 
 // Back-to-back variety: when the same scenario fires several times in a row,
 // rotate through these slugs instead of replaying one line. Index 0 is the
@@ -237,9 +239,10 @@ export class Audio {
       this.ambient = new Howl({ src: [`${this.base}assets/audio/ambient-loop.mp3`], loop: true, volume: 0.25 });
       if (this.soundOn) this.startAmbient();
     });
-    // announcer VO clips (each grade may have several takes that shuffle)
+    // announcer VO clips (each grade may have several takes that shuffle) — from
+    // the build-time manifest, so every take registers instantly and completely
     for (const slug of new Set(Object.values(VO_SLUG))) {
-      void this.loadVoVariants(slug);
+      this.loadVoVariants(slug);
     }
     // crowd reactions: polite golf clap (300+) and full cheer (340+)
     for (const s of ['clap', 'cheer'] as const) {
@@ -259,34 +262,15 @@ export class Audio {
     if (this.soundOn) this.sfxClips.get('cheer')?.play();
   }
 
-  /** Load every announcer take for a grade: `<slug>.mp3` plus any `<slug>-2.mp3`,
-   *  `<slug>-3.mp3` … that exist (up to MAX_VO_VARIANTS). They probe in parallel;
-   *  whichever are present load and become the shuffle pool for that grade.
-   *  Probes that MISS are retried once after a beat and merged back in — on a
-   *  flaky mobile network a transient miss otherwise collapses the pool (e.g. to
-   *  a single cannon take), which is the only way a line can repeat back-to-back. */
-  private async loadVoVariants(slug: string): Promise<void> {
-    const names = [`${slug}.mp3`];
-    for (let i = 2; i <= MAX_VO_VARIANTS; i++) names.push(`${slug}-${i}.mp3`);
-    const url = (n: string): string => `${this.base}assets/audio/vo/${n}`;
-    const mk = (name: string): { name: string; howl: Howl } => ({
+  /** Register every announcer take for a grade from the build-time manifest:
+   *  `<slug>.mp3` plus any `<slug>-2.mp3`, `<slug>-3.mp3`, … No network probing —
+   *  the manifest is the complete truth, so the pool can never silently degrade. */
+  private loadVoVariants(slug: string): void {
+    const takes = VO_FILES.filter((f) => f === `${slug}.mp3` || f.startsWith(`${slug}-`)).map((name) => ({
       name,
-      howl: new Howl({ src: [url(name)], volume: 0.55 }),
-    });
-    const present = await Promise.all(names.map((n) => this.exists(url(n)).then((ok) => (ok ? n : null))));
-    const takes = present.filter((n): n is string => n !== null).map(mk);
-    if (takes.length) this.vo.set(slug, takes); // register what we have immediately
-    const missing = names.filter((_, i) => !present[i]);
-    if (!missing.length) return;
-    await new Promise((r) => setTimeout(r, 1500));
-    const retried = await Promise.all(missing.map((n) => this.exists(url(n)).then((ok) => (ok ? n : null))));
-    const late = retried.filter((n): n is string => n !== null).map(mk);
-    if (late.length) {
-      const merged = [...(this.vo.get(slug) ?? []), ...late].sort(
-        (a, b) => names.indexOf(a.name) - names.indexOf(b.name),
-      );
-      this.vo.set(slug, merged);
-    }
+      howl: new Howl({ src: [`${this.base}assets/audio/vo/${name}`], volume: 0.55 }),
+    }));
+    if (takes.length) this.vo.set(slug, takes);
   }
 
   private async exists(url: string): Promise<boolean> {

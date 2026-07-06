@@ -1,6 +1,35 @@
 import { defineConfig, type PluginOption } from 'vite';
 import { fileURLToPath, URL } from 'node:url';
+import { readdirSync } from 'node:fs';
 import { createApi } from './server/handler';
+
+// Bakes the announcer-VO file list into the bundle at build time
+// (import voFiles from 'virtual:vo-manifest'). The game previously DISCOVERED
+// takes by HEAD-probing each candidate URL at boot — on flaky mobile networks a
+// missed probe silently shrank a grade's take pool (degrading variety down to
+// repeats of one clip). With a build-time manifest the client always knows
+// exactly which takes exist; zero probes, zero degraded pools.
+function voManifest(): PluginOption {
+  const read = (): string[] => {
+    try {
+      return readdirSync(fileURLToPath(new URL('./public/assets/audio/vo', import.meta.url)))
+        .filter((f) => f.endsWith('.mp3'))
+        .sort();
+    } catch {
+      return [];
+    }
+  };
+  const id = 'virtual:vo-manifest';
+  return {
+    name: 'vo-manifest',
+    resolveId(source) {
+      return source === id ? `\0${id}` : undefined;
+    },
+    load(source) {
+      return source === `\0${id}` ? `export default ${JSON.stringify(read())};` : undefined;
+    },
+  };
+}
 
 // Serves the BCCC API at /api/bccc/* during `npm run dev` so the email->code
 // claim flow (and leaderboard) is testable locally. Runs in MOCK mode unless
@@ -43,7 +72,7 @@ export default defineConfig({
   // allow tunnel hostnames (trycloudflare quick tunnels) so testers can reach
   // the dev server remotely; the dev backend is mock-mode, no secrets at risk
   server: { allowedHosts: true },
-  plugins: [bcccApiDev()],
+  plugins: [bcccApiDev(), voManifest()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
