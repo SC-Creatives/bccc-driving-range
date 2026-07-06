@@ -143,6 +143,7 @@ export class Game {
     s.bestDrive = 0;
     s.totalYds = 0;
     s.shots = [];
+    this.audio.newRound(); // follow-up-only VO lines can't open a fresh bucket
     track('bccc_game_start');
     this.updateStats();
     this.nextBall();

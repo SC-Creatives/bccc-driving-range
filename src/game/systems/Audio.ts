@@ -65,6 +65,14 @@ const VO_STREAK_GROUP: Record<string, string> = {
 // only read as follow-ups, and a gate keyed to a specific filename is blind to
 // any content/label mix-up at recording or export time.
 
+// Lines that only read as a FOLLOW-UP (they presume an earlier shot in the same
+// bucket): excluded until their grade has already played a line THIS ROUND —
+// so they can never open a session OR a fresh bucket (owner call 2026-07-06:
+// "Respectable 4" led off a new round).
+const VO_FOLLOWUP_ONLY: Record<string, string[]> = {
+  respectable: ['respectable-3.mp3'], // recorded as "Respectable 4"
+};
+
 // Some files are different TAKES of the SAME line (verified by audio
 // cross-correlation, 2026-07-06) — playing two of them in a row sounds like a
 // repeat even though the filenames differ. Files sharing a group id here never
@@ -92,7 +100,8 @@ export class Audio {
   private voLast = new Map<string, string>(); // last take FILENAME per slug — avoids back-to-back
   // repeats. By name, not index: the probe-retry merge re-orders the takes array,
   // so a stored index can silently point at a different file after a merge.
-  private voPlayed = new Set<string>(); // slugs heard this session — gates VO_FOLLOWUP_ONLY takes
+  private voPlayed = new Set<string>(); // slugs heard this session — first play is the base take
+  private voPlayedRound = new Set<string>(); // slugs heard this ROUND — gates VO_FOLLOWUP_ONLY lines
   private lastVoGrade = ''; // grade of the previous shot — detects consecutive repeats
   private voStreak = 0; // consecutive count of the current grade — indexes VO_ROTATION
   private sfxClips = new Map<string, Howl>(); // crowd reactions (clap/cheer)
@@ -321,25 +330,38 @@ export class Audio {
     this.playSlug(rotation[this.voStreak % rotation.length]);
   }
 
-  /** Play one take for a slug. The FIRST play of a session is always the base
-   *  take (`<slug>.mp3`) — alternates can never open a grade, no matter how the
-   *  files are labeled. Subsequent plays shuffle all takes, never following a
-   *  take with another take of the same LINE (VO_LINE_GROUP — two deliveries of
-   *  one joke read as a repeat even though the files differ). */
+  /** A fresh bucket started — follow-up-only lines are gated again until their
+   *  grade has spoken this round. */
+  newRound(): void {
+    this.voPlayedRound.clear();
+  }
+
+  /** Play one take for a slug. Rules, in precedence order:
+   *  1. First play of a SESSION is always the base take (`<slug>.mp3`) —
+   *     alternates can never open, no matter how the files are labeled.
+   *  2. VO_FOLLOWUP_ONLY lines can't play until their grade has spoken this
+   *     ROUND (they presume an earlier shot in the bucket). This outranks the
+   *     no-repeat rule — repeating a line beats leaking a follow-up opener.
+   *  3. Otherwise shuffle, never following a take with another take of the same
+   *     LINE (VO_LINE_GROUP — two deliveries of one joke read as a repeat). */
   private playSlug(slug: string): void {
     const takes = this.vo.get(slug);
     if (!takes || !takes.length) return;
+    const gated = this.voPlayedRound.has(slug) ? [] : (VO_FOLLOWUP_ONLY[slug] ?? []);
+    let eligible = takes.filter((t) => !gated.includes(t.name));
+    if (!eligible.length) eligible = takes; // safety: never end up empty
     let pick: { name: string; howl: Howl };
     if (!this.voPlayed.has(slug)) {
-      pick = takes.find((t) => t.name === `${slug}.mp3`) ?? takes[0];
+      pick = eligible.find((t) => t.name === `${slug}.mp3`) ?? eligible[0];
     } else {
       const last = this.voLast.get(slug);
-      let pool = last === undefined ? takes : takes.filter((t) => lineGroup(t.name) !== lineGroup(last));
-      if (!pool.length) pool = takes; // single-line grade: repeat is unavoidable
+      let pool = last === undefined ? eligible : eligible.filter((t) => lineGroup(t.name) !== lineGroup(last));
+      if (!pool.length) pool = eligible; // repeat a line rather than leak a gated follow-up
       pick = pool[Math.floor(Math.random() * pool.length)];
     }
     this.voLast.set(slug, pick.name);
     this.voPlayed.add(slug);
+    this.voPlayedRound.add(slug);
     pick.howl.play();
   }
 }
