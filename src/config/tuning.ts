@@ -57,6 +57,13 @@ export const TUNING = {
   // Presentation only: flight DURATION, not the distance model (resultYd unchanged).
   flightTimeBase: 1.15, // Tc = base + resultYd/timeDiv
   flightTimeDiv: 330,
+  // Horizontal speed shape through the carry (owner call 2026-07-06: real ball
+  // physics — hot off the face, decelerating into the landing, not constant).
+  // progress e = mix*(1-(1-p)^pow) + (1-mix)*p  ->  launch ~1.9x the average
+  // speed, touchdown ~0.25x. Also shifts the apex forward / steepens the descent
+  // in distance terms, like a real drive under drag. Presentation only.
+  carryEasePow: 2.2, // ease-out exponent (higher = punchier launch)
+  carryEaseMix: 0.75, // ease vs linear blend (1 = full ease, 0 = old constant speed)
   rollDurBase: 0.7, // rollDur = base + (totalPx - carryPx)/rollDurDiv
   rollDurDiv: 450,
 

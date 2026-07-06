@@ -47,7 +47,14 @@ export const Physics = {
         b.rollDur = TUNING.rollDurBase + (b.totalPx - b.carryPx) / TUNING.rollDurDiv;
         onCarryEnd();
       }
-      b.x = b.carryPx * b.p;
+      // horizontal ease: hot off the face, decelerating through flight (drag).
+      // Height stays parameterized on time (p), so the eased DISTANCE pushes the
+      // apex forward and steepens the descent — a real drive's shape. The carry
+      // distance/duration (and so the distance model) are unchanged.
+      const e =
+        TUNING.carryEaseMix * (1 - Math.pow(1 - b.p, TUNING.carryEasePow)) +
+        (1 - TUNING.carryEaseMix) * b.p;
+      b.x = b.carryPx * e;
       const h = 4 * b.apex * b.p * (1 - b.p); // parabolic carry arc
       b.y = GROUND - h;
       b.trail.push({ x: b.x, y: b.y });
