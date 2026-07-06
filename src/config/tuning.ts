@@ -50,12 +50,13 @@ export const TUNING = {
   apexFactor: 0.92, // apex ~ resultYd * apexFactor * (0.7 + 0.3*Q)
   apexQMin: 0.7,
   apexQRange: 0.3,
-  // stretched 2026-07-06 (owner call: more hang time) — 0.85/520 -> 1.0/400.
+  // stretched 2026-07-06 (owner calls: more hang time, then floatier still) —
+  // 0.85/520 -> 1.0/400 -> 1.15/330; roll 0.55/600 -> 0.7/450.
   // Presentation only: flight DURATION, not the distance model (resultYd unchanged).
-  flightTimeBase: 1.0, // Tc = base + resultYd/timeDiv
-  flightTimeDiv: 400,
-  rollDurBase: 0.55, // rollDur = base + (totalPx - carryPx)/rollDurDiv
-  rollDurDiv: 600,
+  flightTimeBase: 1.15, // Tc = base + resultYd/timeDiv
+  flightTimeDiv: 330,
+  rollDurBase: 0.7, // rollDur = base + (totalPx - carryPx)/rollDurDiv
+  rollDurDiv: 450,
 
   // ---- world / camera ----
   PXY: 2.55, // pixels per yard (world space)
