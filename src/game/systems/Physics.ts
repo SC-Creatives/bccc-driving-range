@@ -44,7 +44,13 @@ export const Physics = {
         b.p = 1;
         b.rolling = true;
         b.rollT = 0;
-        b.rollDur = TUNING.rollDurBase + (b.totalPx - b.carryPx) / TUNING.rollDurDiv;
+        // roll duration chosen so the roll BEGINS at exactly the landing speed:
+        // the quadratic ease-out below starts at slope 2/rollDur, so solving
+        // 2*rollPx/rollDur = vLand makes flight -> roll one continuous motion
+        // (no seam/catch at touchdown). Clamped so duffs still settle briskly.
+        const vLand = (b.carryPx * (1 - TUNING.carryEaseMix)) / b.Tc;
+        const rollPx = b.totalPx - b.carryPx;
+        b.rollDur = Math.min(1.4, Math.max(0.35, (2 * rollPx) / Math.max(1, vLand)));
         onCarryEnd();
       }
       // horizontal ease: hot off the face, decelerating through flight (drag).

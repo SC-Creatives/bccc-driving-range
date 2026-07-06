@@ -65,8 +65,8 @@ export const TUNING = {
   // steepens the descent in distance terms, like a real drive. Presentation only.
   carryEasePow: 2.8, // ease-out exponent (higher = punchier launch)
   carryEaseMix: 0.5, // ease vs linear blend (1 = full ease, 0 = old constant speed)
-  rollDurBase: 0.7, // rollDur = base + (totalPx - carryPx)/rollDurDiv
-  rollDurDiv: 450,
+  // (rollDurBase/rollDurDiv retired 2026-07-06 — roll duration is now derived in
+  // Physics.stepFlight so the roll starts at exactly the landing speed)
 
   // ---- world / camera ----
   PXY: 2.55, // pixels per yard (world space)
