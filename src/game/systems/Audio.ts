@@ -42,10 +42,7 @@ const VO_ROTATION: Record<string, string[]> = {
   'Worm Burner': ['wormburner', 'shortgrass', 'shanked'],
   'On the Short Grass': ['shortgrass', 'wormburner', 'shanked'],
   Respectable: ['respectable'],
-  // clubhouse currently has ONE distinct line (base and -3 are two takes of the
-  // same joke) — a repeat borrows a cannon line (praise-adjacent) rather than
-  // replaying it. Drop this back to ['clubhouse'] once a 2nd line is recorded.
-  'Now That’s Clubhouse Talk': ['clubhouse', 'cannon'],
+  'Now That’s Clubhouse Talk': ['clubhouse'],
   'Absolute Cannon': ['cannon'],
   'PURE — Flushed It': ['pure'],
 };
