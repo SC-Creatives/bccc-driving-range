@@ -64,11 +64,10 @@ const VO_STREAK_GROUP: Record<string, string> = {
 
 // Lines that only read as a FOLLOW-UP (they presume an earlier shot in the same
 // bucket): excluded until their grade has already played a line THIS ROUND —
-// so they can never open a session OR a fresh bucket (owner call 2026-07-06:
-// "Respectable 4" led off a new round).
-const VO_FOLLOWUP_ONLY: Record<string, string[]> = {
-  respectable: ['respectable-3.mp3'], // recorded as "Respectable 4"
-};
+// so they can never open a session OR a fresh bucket. Currently empty:
+// "Respectable 4" (respectable-3.mp3) was re-recorded 2026-07-06 to stand
+// alone and its gate was lifted. Add filenames here if future takes need it.
+const VO_FOLLOWUP_ONLY: Record<string, string[]> = {};
 
 // Some files are different TAKES of the SAME line (verified by audio
 // cross-correlation, 2026-07-06) — playing two of them in a row sounds like a
