@@ -2,6 +2,13 @@ import { TUNING } from '../../config/tuning';
 import type { GameState } from '../state';
 
 /**
+ * Top-tier grade string. Single source of truth: it's the on-screen label AND
+ * the key for the PURE gold-stamp / celebration / VO lookups (Overlay, Game,
+ * Audio) — change the text here and everything follows.
+ */
+export const PURE_GRADE = 'Nuked It!';
+
+/**
  * Reward + grading. The announcer grade buckets are ported verbatim from the
  * prototype's gradeShot(). `newCode()` is the client-side placeholder reveal —
  * Phase 2 replaces it with a server-minted single-use Shopify code gated behind
@@ -42,6 +49,6 @@ export const Reward = {
     // hidden Q gate made the peak moments mismatch). PURE and the crowd roar
     // now always land together. No Q check: a sub-0.32 strike can't physically
     // reach 340 (max ~240), so the shank guard above already covers it.
-    if (yd >= TUNING.CHEER_THRESHOLD) s.resultGrade = 'PURE — Flushed It';
+    if (yd >= TUNING.CHEER_THRESHOLD) s.resultGrade = PURE_GRADE;
   },
 };

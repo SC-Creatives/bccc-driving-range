@@ -2,6 +2,7 @@ import { TUNING } from '../../config/tuning';
 import { buildBoard, type Member } from '../systems/Leaderboard';
 import { claimMembership, fetchLeaderboard, type ClaimFn } from '../systems/Backend';
 import { track } from '../systems/Analytics';
+import { PURE_GRADE } from '../systems/Reward';
 import { shareDrive } from './ShareCard';
 import type { Audio } from '../systems/Audio';
 import type { GameState } from '../state';
@@ -112,7 +113,7 @@ export class Overlay {
 
   showResult(s: GameState): void {
     const last = s.ballIndex + 1 >= TUNING.BALLS_PER_ROUND;
-    const pure = s.resultGrade.startsWith('PURE');
+    const pure = s.resultGrade === PURE_GRADE;
     this.show(
       `<div class="ov-grade${pure ? ' pure' : ''}">${s.resultGrade}</div>` +
         `<div class="ov-dist">${Math.round(s.resultYd)}<span class="yd"> YD</span></div>` +

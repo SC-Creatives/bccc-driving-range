@@ -1,5 +1,6 @@
 import { Howl, Howler } from 'howler';
 import VO_FILES from 'virtual:vo-manifest';
+import { PURE_GRADE } from './Reward';
 
 /**
  * Audio — a procedural WebAudio SFX engine (synthesized, no asset files needed)
@@ -18,7 +19,7 @@ const VO_SLUG: Record<string, string> = {
   Respectable: 'respectable',
   'Now That’s Clubhouse Talk': 'clubhouse',
   'Absolute Cannon': 'cannon',
-  'PURE — Flushed It': 'pure',
+  [PURE_GRADE]: 'pure',
 };
 
 // Each grade can have multiple announcer takes that shuffle so repeated drives in
@@ -44,7 +45,7 @@ const VO_ROTATION: Record<string, string[]> = {
   Respectable: ['respectable'],
   'Now That’s Clubhouse Talk': ['clubhouse'],
   'Absolute Cannon': ['cannon'],
-  'PURE — Flushed It': ['pure'],
+  [PURE_GRADE]: ['pure'],
 };
 
 // Grades that share a streak: any consecutive run WITHIN the group advances the
