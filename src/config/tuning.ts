@@ -27,8 +27,11 @@ export const TUNING = {
   // Perfect-lock snap windows (2026-07-06): a mathematically exact double-perfect
   // (P=1.000, Q=1.000 -> the 358 ceiling) was a sub-millisecond frame lottery —
   // tap close enough and it counts as perfect, so the max is earned by skill.
-  powerSnap: 0.98, // lock at >= this -> P = 1.0 (~40ms window at the peak)
-  contactSnapOff: 0.0084, // |contact-0.5| <= this -> Q = 1.0 (SWEET_W * 0.08)
+  // Widened same day for touch: the 0.0084 contact snap was an ~8ms finger
+  // window — under mobile touch-latency jitter (±25ms) flushes were unreachable
+  // and 340+ never fired on phones.
+  powerSnap: 0.97, // lock at >= this -> P = 1.0 (~39ms window at the peak)
+  contactSnapOff: 0.02, // |contact-0.5| <= this -> Q = 1.0 (inner ~19% of the gold zone, ~20ms)
 
   // ---- swing animation timing (drives swingAngle + frame mapping) ----
   contactEase: 11, // how fast the club eases to top-of-backswing while aiming
