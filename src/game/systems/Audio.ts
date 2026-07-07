@@ -47,10 +47,7 @@ const VO_ROTATION: Record<string, string[]> = {
   // replaying it. Drop this back to ['clubhouse'] once a 2nd line is recorded.
   'Now That’s Clubhouse Talk': ['clubhouse', 'cannon'],
   'Absolute Cannon': ['cannon'],
-  // pure has ONE line left (owner pruned the alternate) — a repeat borrows a
-  // cannon line (tonally adjacent big-drive praise) rather than replaying it.
-  // Drop back to ['pure'] once a 2nd pure line is recorded.
-  'PURE — Flushed It': ['pure', 'cannon'],
+  'PURE — Flushed It': ['pure'],
 };
 
 // Grades that share a streak: any consecutive run WITHIN the group advances the
