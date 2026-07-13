@@ -139,13 +139,12 @@ export class Overlay {
     const head = earned
       ? '<div class="ov-grade">Membership Granted</div>'
       : '<div class="ov-grade" style="color:var(--bone)">Round Complete</div>';
-    const share = s.bestDrive > 0 ? '<button class="btn share" id="shareBtn">Text it to a friend</button>' : '';
-    const shareHint = s.bestDrive > 0
-      ? '<div class="share-hint">Didn’t bring your A game? Text a friend to hit another bucket of range balls.</div>'
-      : '';
 
     let body: string;
     if (earned) {
+      // Membership page: focused on the reward. No "text a friend for another
+      // bucket" CTA here — a member already cleared the bar; that CTA lives only
+      // on the miss branch below.
       track('bccc_membership_unlocked', { bestDrive: s.bestDrive });
       body =
         '<div class="card">' +
@@ -161,12 +160,14 @@ export class Overlay {
         '<div class="members" id="standings"><h4>Member Standings</h4>' +
         rows +
         '</div>' +
-        `<div class="sum-actions">${share}</div>` +
-        shareHint +
         '<div class="prompt" id="again" style="margin-top:10px">Play another round</div>';
     } else {
-      // near-miss pressure: when they're within striking distance, the replay CTA
-      // names the gap — "4 yards short — one more bucket?"
+      // Miss branch: near-miss pressure (the replay CTA names the gap) + the
+      // "text a friend to hit another bucket" share CTA.
+      const share = s.bestDrive > 0 ? '<button class="btn share" id="shareBtn">Text it to a friend</button>' : '';
+      const shareHint = s.bestDrive > 0
+        ? '<div class="share-hint">Didn’t bring your A game? Text a friend to hit another bucket of range balls.</div>'
+        : '';
       const short = TUNING.MEMBER_THRESHOLD - s.bestDrive;
       const cta = short <= 25 ? `${short} yards short — one more bucket?` : 'Hit another bucket';
       body =
