@@ -141,7 +141,7 @@ export class Overlay {
       : '<div class="ov-grade" style="color:var(--bone)">Round Complete</div>';
     const share = s.bestDrive > 0 ? '<button class="btn share" id="shareBtn">Text it to a friend</button>' : '';
     const shareHint = s.bestDrive > 0
-      ? '<div class="share-hint">When a friend plays your link, you BOTH get an extra 5% off the drop.</div>'
+      ? '<div class="share-hint">Didn’t bring your A game? Text a friend to hit another bucket of range balls.</div>'
       : '';
 
     let body: string;
