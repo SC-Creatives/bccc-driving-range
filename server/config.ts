@@ -27,7 +27,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const live = Boolean(klaviyoApiKey || shopifyPool || shopifyAdmin);
   return {
     mock: !live,
-    perk: env.BCCC_PERK ?? '15% off + early access',
+    perk: env.BCCC_PERK ?? 'Early Access + Free Gift with Purchase',
     rateLimitPerMin: Number(env.BCCC_RATE_LIMIT_PER_MIN ?? 5),
     klaviyo: {
       apiKey: klaviyoApiKey,

@@ -10,19 +10,10 @@ export const PURE_GRADE = 'Nuked It!';
 
 /**
  * Reward + grading. The announcer grade buckets are ported verbatim from the
- * prototype's gradeShot(). `newCode()` is the client-side placeholder reveal —
- * Phase 2 replaces it with a server-minted single-use Shopify code gated behind
- * email capture (bccc-backend-spec.md §1-2).
+ * prototype's gradeShot(). The membership code is now a single universal code
+ * (MEMBERSHIP_CODE in Backend.ts) rather than a per-player mint.
  */
 export const Reward = {
-  /** Client-side placeholder promo code. NOT a real code — see backend spec §0. */
-  newCode(): string {
-    let c = 'BCCC-';
-    const a = 'ACDEFGHJKLMNPRTUVWXY3479';
-    for (let i = 0; i < 4; i++) c += a[Math.floor(Math.random() * a.length)];
-    return c;
-  },
-
   /** Deadpan club-announcer grade. Maps (yards, Q) -> grade + line. */
   gradeShot(s: GameState, yd: number, Q: number): void {
     if (Q < 0.32) {
