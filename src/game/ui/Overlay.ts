@@ -169,12 +169,15 @@ export class Overlay {
         ? '<div class="share-hint">Didn’t bring your A game? Text a friend to hit another bucket of range balls.</div>'
         : '';
       const short = TUNING.MEMBER_THRESHOLD - s.bestDrive;
-      const cta = short <= 25 ? `${short} yards short — one more bucket?` : 'Hit another bucket';
+      // Non-clickable tease (NOT a replay CTA): another bucket is earned by
+      // texting a friend, not a free replay. Kept as an inert label — the dev
+      // wires the referral -> extra-bucket fulfillment (HANDOFF §5).
+      const tag = short <= 25 ? `${short} yards short — one more bucket?` : 'So close.';
       body =
         `<div class="ov-dist" style="font-size:clamp(40px,11vw,64px)">${s.bestDrive}<span class="yd"> YD BEST</span></div>` +
         `<div class="ov-line" style="margin-top:8px">${short} yards short of a membership. The driving range is open 24/7.</div>` +
         `<div class="members" id="standings" style="margin-top:14px"><h4>Member Standings</h4>${rows}</div>` +
-        `<div class="sum-actions"><button class="btn" id="again">${cta}</button>${share}</div>` +
+        `<div class="sum-actions"><div class="miss-tag" aria-disabled="true">${tag}</div>${share}</div>` +
         shareHint;
     }
 
