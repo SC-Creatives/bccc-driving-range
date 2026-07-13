@@ -172,7 +172,7 @@ export class Overlay {
       // Non-clickable tease (NOT a replay CTA): another bucket is earned by
       // texting a friend, not a free replay. Kept as an inert label — the dev
       // wires the referral -> extra-bucket fulfillment (HANDOFF §5).
-      const tag = short <= 25 ? `${short} yards short — one more bucket?` : 'So close.';
+      const tag = `${short} yards short — one more bucket?`;
       body =
         `<div class="ov-dist" style="font-size:clamp(40px,11vw,64px)">${s.bestDrive}<span class="yd"> YD BEST</span></div>` +
         `<div class="ov-line" style="margin-top:8px">${short} yards short of a membership. The driving range is open 24/7.</div>` +
